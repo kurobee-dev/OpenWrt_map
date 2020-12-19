@@ -1,5 +1,5 @@
 *** map.sh.org
---- map.sh.new
+--- map.sh
 ***************
 *** 26,36 ****
   	local link="map-$cfg"
@@ -33,7 +33,7 @@
   	  else
 + 	    local useps="${snatpslimit:-4096}"
   	    for portset in $(eval "echo \$RULE_${k}_PORTSETS"); do
-+ 	      if [ "$useps" -ne 0 ]; then
++ 	      if [ "$useps" -gt 0 ]; then
                 for proto in icmp tcp udp; do
   	        json_add_object ""
   	          json_add_string type nat
@@ -54,7 +54,7 @@
   	proto_config_add_int "ttl"
   	proto_config_add_string "zone"
   	proto_config_add_string "encaplimit"
-+ 	proto_config_add_string "snatpslimit"
++ 	proto_config_add_int "snatpslimit"
   }
   
   [ -n "$INCLUDE_ONLY" ] || {
