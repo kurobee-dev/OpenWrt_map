@@ -28,9 +28,9 @@ proto_map_setup() {
 	# uncomment for legacy MAP0 mode
 	export LEGACY=1
 
-	local type mtu ttl tunlink zone encaplimit snatpslimit
+	local type mtu ttl tunlink zone encaplimit snatstartps snatendps
 	local rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
-	json_get_vars type mtu ttl tunlink zone encaplimit snatpslimit
+	json_get_vars type mtu ttl tunlink zone encaplimit snatstartps snatendps
 	json_get_vars rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
 
 	[ "$zone" = "-" ] && zone=""
@@ -140,9 +140,10 @@ proto_map_setup() {
 	      json_add_string snat_ip $(eval "echo \$RULE_${k}_IPV4ADDR")
 	    json_close_object
 	  else
-	    local useps="${snatpslimit:-4096}"
+	    local pscount=0
 	    for portset in $(eval "echo \$RULE_${k}_PORTSETS"); do
-	      if [ "$useps" -gt 0 ]; then
+	     pscount=`expr $pscount + 1`
+	     if [ "$pscount" -ge "${snatstartps:-1}" -a "$pscount" -le "${snatendps:-4096}" ]; then
               for proto in icmp tcp udp; do
 	        json_add_object ""
 	          json_add_string type nat
@@ -154,8 +155,7 @@ proto_map_setup() {
                   json_add_string snat_port "$portset"
 	        json_close_object
               done
-	      fi
-	      useps=`expr $useps - 1`
+	     fi
 	    done
 	  fi
 	  if [ "$type" = "map-t" ]; then
@@ -239,7 +239,8 @@ proto_map_init_config() {
 	proto_config_add_int "ttl"
 	proto_config_add_string "zone"
 	proto_config_add_string "encaplimit"
-	proto_config_add_int "snatpslimit"
+	proto_config_add_int "snatstartps"
+	proto_config_add_int "snatendps"
 }
 
 [ -n "$INCLUDE_ONLY" ] || {
