@@ -1,0 +1,60 @@
+*** map.sh.org
+--- map.sh.new
+***************
+*** 26,36 ****
+  	local link="map-$cfg"
+  
+  	# uncomment for legacy MAP0 mode
+! 	#export LEGACY=1
+  
+! 	local type mtu ttl tunlink zone encaplimit
+  	local rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
+! 	json_get_vars type mtu ttl tunlink zone encaplimit
+  	json_get_vars rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
+  
+  	[ "$zone" = "-" ] && zone=""
+--- 26,36 ----
+  	local link="map-$cfg"
+  
+  	# uncomment for legacy MAP0 mode
+! 	export LEGACY=1
+  
+! 	local type mtu ttl tunlink zone encaplimit snatpslimit
+  	local rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
+! 	json_get_vars type mtu ttl tunlink zone encaplimit snatpslimit
+  	json_get_vars rule ipaddr ip4prefixlen ip6prefix ip6prefixlen peeraddr ealen psidlen psid offset
+  
+  	[ "$zone" = "-" ] && zone=""
+***************
+*** 140,146 ****
+--- 140,148 ----
+  	      json_add_string snat_ip $(eval "echo \$RULE_${k}_IPV4ADDR")
+  	    json_close_object
+  	  else
++ 	    local useps="${snatpslimit:-4096}"
+  	    for portset in $(eval "echo \$RULE_${k}_PORTSETS"); do
++ 	      if [ "$useps" -ne 0 ]; then
+                for proto in icmp tcp udp; do
+  	        json_add_object ""
+  	          json_add_string type nat
+***************
+*** 152,157 ****
+--- 154,161 ----
+                    json_add_string snat_port "$portset"
+  	        json_close_object
+                done
++ 	      fi
++ 	      useps=`expr $useps - 1`
+  	    done
+  	  fi
+  	  if [ "$type" = "map-t" ]; then
+***************
+*** 235,240 ****
+--- 239,245 ----
+  	proto_config_add_int "ttl"
+  	proto_config_add_string "zone"
+  	proto_config_add_string "encaplimit"
++ 	proto_config_add_string "snatpslimit"
+  }
+  
+  [ -n "$INCLUDE_ONLY" ] || {
