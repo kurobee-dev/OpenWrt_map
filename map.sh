@@ -239,7 +239,7 @@ proto_map_init_config() {
 	proto_config_add_int "ttl"
 	proto_config_add_string "zone"
 	proto_config_add_string "encaplimit"
-	proto_config_add_string "snatpslimit"
+	proto_config_add_int "snatpslimit"
 }
 
 [ -n "$INCLUDE_ONLY" ] || {
