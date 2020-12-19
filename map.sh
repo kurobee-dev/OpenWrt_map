@@ -142,7 +142,7 @@ proto_map_setup() {
 	  else
 	    local useps="${snatpslimit:-4096}"
 	    for portset in $(eval "echo \$RULE_${k}_PORTSETS"); do
-	      if [ "$useps" -ne 0 ]; then
+	      if [ "$useps" -gt 0 ]; then
               for proto in icmp tcp udp; do
 	        json_add_object ""
 	          json_add_string type nat
